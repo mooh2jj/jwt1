@@ -24,13 +24,13 @@ public class MyFilter1 implements Filter {
             var headerAuth = req.getHeader("Authorization");
             System.out.println("headerAuth: "+ headerAuth);
 
-            if (headerAuth.equals("cos")) {
-                filterChain.doFilter(req, res);
-
-            } else {
-                PrintWriter printWriter = res.getWriter();
-                printWriter.println("인증 안됨");
-            }
+//            if (headerAuth.equals("cos")) {
+//                filterChain.doFilter(req, res);
+//
+//            } else {
+//                PrintWriter printWriter = res.getWriter();
+//                printWriter.println("인증 안됨");
+//            }
         }
 
         System.out.println("필터1");
