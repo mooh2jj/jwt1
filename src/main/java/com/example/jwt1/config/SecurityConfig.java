@@ -34,11 +34,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)// stateless
                 .and()
-                .addFilter(corsFilter)      // @CrossOrigin(인증x), 시큐리티 필터에 등록인증(O)
+                .addFilter(corsFilter)      // 다른 도메인에서 ajax으로 접근하는 것을 막는 것. @CrossOrigin(인증x), 시큐리티 필터에 등록인증(O)
                 .formLogin().disable()
-                .httpBasic().disable()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))       // jwt 필터 등록
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
+                .httpBasic().disable()      // httpBasic() -> Authrization : id, pw 노출이 되는 인증방식
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))       // 인증  jwt 필터 등록
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))     // 인가 jwt 필터 등록
                 .authorizeRequests()
                 .antMatchers("/api/v1/user/**")
                 .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")

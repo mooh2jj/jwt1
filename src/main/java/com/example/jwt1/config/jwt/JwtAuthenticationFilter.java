@@ -27,8 +27,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
 
-    // /login 요청을 하면 로그인 시도를 위해서 실행되는 함수
     @Override
+    // /login 요청을 하면 로그인 시도를 위해서 실행되는 함수
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         System.out.println("JwtAuthenticationFilter: 로그인 시도중");
 
@@ -48,16 +48,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
 
-            // PrincipalDetailsService의 loadUserByUsername() 함수가 실행된 후 정상이면 authentication이 리턴됨.
-            // DB에 있는 username과 password가 일치한다.
+            // authenticationManager 로그인 시도: authenticate() => PrincipalDetailsService의 loadUserByUsername() 함수가 실행된 후 정상이면 authentication이 리턴됨.
+            // DB에 있는 username과 password가 일치하면 로그인되고, 로그인되면 session영역에 저장됨.
             Authentication authentication
                     = authenticationManager.authenticate(authenticationToken);
             // authenication 객체가 session영역에 저장됨 => 로그인되었다는 뜻
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
             System.out.println("principalDetails:(로그인 완료됨) " + principalDetails.getUser().getUsername());    // 나오면 인증(로그인)된 거!
 //            System.out.println(request.getInputStream().toString());
-            // 리턴의 이유는 권한 관리를 security가 대신해주기 때문에 편하려고 하는 거
-            // 굳이 jwt 토큰을 사용하면서 세션을 만들 이유가 없음. 근데 단지 권한 처리땨문에 session을 넣어줌.
+            // authenication 리턴의 이유는 권한 관리를 security가 대신해주기 때문에 편하려고 하는 거
+            // 굳이 jwt 토큰을 사용하면서 세션을 만들 이유가 없음. 근데 단지 권한 처리때문에 session을 넣어줌.
 
 
             return authentication;
@@ -91,6 +91,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("username", principalDetails.getUser().getUsername())
                 .sign(Algorithm.HMAC512("cos"));
 
-        response.addHeader("Authorization", "Bearer "+jwtToken);
+        response.addHeader("Authorization", "Bearer "+jwtToken);        // 이제 jwt를 httpHeader Authorization에 넣고 응답해줌!
     }
 }
