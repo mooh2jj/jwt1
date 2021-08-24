@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import javax.security.sasl.AuthenticationException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -60,27 +61,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
+        } else {
+            throw new AuthenticationException("Token is not vaild");
         }
 
-//        String username = JWT.require(Algorithm.HMAC512("cos")).build()
-//                        .verify(jwtToken)
-//                        .getClaim("username")
-//                        .asString();
-//
-//        // 서명이 정상적으로 됨
-//        if (username != null) {
-//            User userEntity = userRepository.findByUsername(username);
-//
-//            PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
-//
-//            // 토큰서명을 통해서 서명이 정상이면 Authentication 객체를 만들어준다
-//            Authentication authentication =
-//                    new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
-//
-//            // 강제로 시큐리티의 세션에 접근하여 Authentication 객체를 저장
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//            chain.doFilter(request, response);
-//        }
     }
 }
