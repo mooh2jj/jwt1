@@ -6,6 +6,8 @@ import com.example.jwt1.auth.PrincipalDetails;
 import com.example.jwt1.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
 
+    private ObjectMapper om = new ObjectMapper();
     // /login 요청을 하면 로그인 시도를 위해서 실행되는 함수
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -41,7 +44,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 //                System.out.println(input);
 //            }
 
-            ObjectMapper om = new ObjectMapper();
             User user = om.readValue(request.getInputStream(), User.class);
             System.out.println(user);
 
@@ -91,6 +93,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("username", principalDetails.getUser().getUsername())
                 .sign(Algorithm.HMAC512("cos"));
 
-        response.addHeader("Authorization", "Bearer "+jwtToken);
+//        response.addHeader("Authorization", "Bearer "+jwtToken);
+        response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer "+ JWTUtil.makeAuthToken(principalDetails));
+        response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        response.getOutputStream().write(om.writeValueAsBytes(principalDetails));
+
     }
 }
