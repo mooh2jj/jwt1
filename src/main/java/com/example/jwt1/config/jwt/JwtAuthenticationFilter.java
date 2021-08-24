@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             Authentication authentication
                     = authenticationManager.authenticate(authenticationToken);
             // authenication 객체가 session영역에 저장됨 => 로그인되었다는 뜻
-            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();                // authenication 정보를 가져옴.
             System.out.println("principalDetails:(로그인 완료됨) " + principalDetails.getUser().getUsername());    // 나오면 인증(로그인)된 거!
 //            System.out.println(request.getInputStream().toString());
             // authenication 리턴의 이유는 권한 관리를 security가 대신해주기 때문에 편하려고 하는 거
@@ -91,6 +91,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withClaim("username", principalDetails.getUser().getUsername())
                 .sign(Algorithm.HMAC512("cos"));
 
-        response.addHeader("Authorization", "Bearer "+jwtToken);        // 이제 jwt를 httpHeader Authorization에 넣고 응답해줌!
+        response.addHeader("Authorization", "Bearer "+jwtToken);        // 이제 jwt를 httpHeader Authorization에 넣고 응답해줌
     }
 }
