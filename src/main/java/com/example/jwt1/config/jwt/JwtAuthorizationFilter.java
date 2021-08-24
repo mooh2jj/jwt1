@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.jwt1.auth.PrincipalDetails;
 import com.example.jwt1.model.User;
 import com.example.jwt1.repository.UserRepository;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,37 +34,53 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 //        super.doFilterInternal(request, response, chain); // 이거 지워야 됨!
         System.out.println("인증이나 권한이 필요한 주소 요청이 됨");
 
-        String jwtHeader = request.getHeader("Authorization");
+//        String jwtHeader = request.getHeader("Authorization");
+        String jwtHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         System.out.println("jwtHeader: "+ jwtHeader);
 
         // JWT 토큰을 검증ㅇ해서 정상적인 사용자인지 확인
         // header가 있는지 확인
-        if (jwtHeader == null || !jwtHeader.startsWith("Bearer")) {
+        if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
         }
 
-        String jwtToken = request.getHeader("Authorization").replace("Bearer ", "");
+//        String jwtToken = request.getHeader("Authorization").replace("Bearer ", "");
+        String jwtToken = jwtHeader.substring("Bearer ".length());
 
-        String username = JWT.require(Algorithm.HMAC512("cos")).build()
-                        .verify(jwtToken)
-                        .getClaim("username")
-                        .asString();
+        VerifyResult result = JWTUtil.verify(jwtToken);
 
-        // 서명이 정상적으로 됨
-        if (username != null) {
-            User userEntity = userRepository.findByUsername(username);
+        if (result.isSuccess()) {
+            User userEntity = userRepository.findByUsername(result.getUsername());
 
             PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
 
-            // 토큰서명을 통해서 서명이 정상이면 Authentication 객체를 만들어준다
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
 
-            // 강제로 시큐리티의 세션에 접근하여 Authentication 객체를 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             chain.doFilter(request, response);
         }
+
+//        String username = JWT.require(Algorithm.HMAC512("cos")).build()
+//                        .verify(jwtToken)
+//                        .getClaim("username")
+//                        .asString();
+//
+//        // 서명이 정상적으로 됨
+//        if (username != null) {
+//            User userEntity = userRepository.findByUsername(username);
+//
+//            PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+//
+//            // 토큰서명을 통해서 서명이 정상이면 Authentication 객체를 만들어준다
+//            Authentication authentication =
+//                    new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+//
+//            // 강제로 시큐리티의 세션에 접근하여 Authentication 객체를 저장
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//            chain.doFilter(request, response);
+//        }
     }
 }
